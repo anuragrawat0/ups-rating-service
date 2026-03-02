@@ -4,7 +4,7 @@ export class CarrierError extends Error {
 
   constructor(
     message: string, 
-    public statusCode: number = 500, 
+    public statusCode: number = 0, 
     public details?: any 
   ) {
     super(message);
