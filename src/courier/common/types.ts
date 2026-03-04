@@ -25,10 +25,10 @@ export const RateRequestSchema = z.object({
 });
 
 export const RateQuotaSchema = z.object({
-    carrier : z.string(),
-    serviceName : z.string(),
-    totalPrice : z.number(),
-    currency : z.string()
+    carrier : z.string().trim().min(1),
+    serviceName : z.string().trim().min(1),
+    totalPrice : z.number().nonnegative(),
+    currency : z.string().regex(/^[A-Z]{3}$/),
 })
 
 export type Address = z.infer<typeof AddressSchema>;
