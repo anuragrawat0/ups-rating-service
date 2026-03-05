@@ -1,3 +1,4 @@
+import { ZodError } from 'zod'
 import type { Courier } from '../common/interface.js'
 import { type RateRequest, type RateQuota, RateRequestSchema } from '../common/types.js'
 import { CarrierError } from '../../errors/error.js'
@@ -16,19 +17,26 @@ export class UPSRatingService implements Courier {
 
       try {
         RateRequestSchema.parse(request);
-      }catch(zodError:any){
-        throw new CarrierError(zodError.message, 400, zodError.errors);
+      }catch(error : unknown){
+        if (error instanceof ZodError){
+            throw new CarrierError(error.message, 400, error.issues);
+        }
+        throw error;
       }
 
-      const upsPayload = UPSMapper.mapRateRequest(
-        request,
-        appConfig.UPS_ACCOUNT_NUMBER || '123456'
-      );
+     if (!appConfig.UPS_ACCOUNT_NUMBER){
+        throw new CarrierError('UPS_ACCOUNT_NUMBER is not configured', 500);
+     }
+      const upsPayload = UPSMapper.mapRateRequest(request, appConfig.UPS_ACCOUNT_NUMBER);
 
-      const upsResponse = await this.client.getRates(upsPayload);
+      try {
+        const upsResponse = await this.client.getRates(upsPayload);
+        return UPSMapper.mapRateResponse(upsResponse);
+      } catch (error: any) {
+        const statusCode = error?.statusCode ?? error?.response?.status ?? 502;
+        const details = error?.response?.data ?? error?.message;
+        throw new CarrierError('UPS rate request failed', statusCode, details);
+      }
 
-      const cleanQuotas = UPSMapper.mapRateResponse(upsResponse);
-      
-      return cleanQuotas;
     }
 }
