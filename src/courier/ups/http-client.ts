@@ -8,8 +8,7 @@ export class UPSClient {
     private oauth : OAuthClient;
 
     constructor(){
-        const securityUrl = appConfig.UPS_BASE_URL.replace('/api', '') 
-        + '/security/v1/oauth/token';
+        const securityUrl = appConfig.UPS_AUTH_URL;
 
         this.oauth = new OAuthClient(
             appConfig.UPS_CLIENT_ID,
