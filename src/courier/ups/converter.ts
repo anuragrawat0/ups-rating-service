@@ -63,18 +63,21 @@ export class UPSMapper {
   }
 
   static mapRateResponse(response: UPSRateResponse): RateQuota[] {
-    const shipments = response.RateResponse.RatedShipment;
+    const shipments = response?.RateResponse?.RatedShipment;
+
+    if (!shipments) return []; 
     
     // ups sometimes returns one object sometimes an array we force it to be an array
     const shipmentArray = Array.isArray(shipments) ? shipments : [shipments];
 
     return shipmentArray.map((shipment: UPSRatedShipment) => {
       const charges = shipment.TotalCharges || shipment.RatedShipmentDetails?.[0]?.TotalCharges;
+      const parsedTotal = Number(charges?.MonetaryValue);
       
       return {
         carrier: 'UPS',
         serviceName: `UPS Service ${shipment.Service.Code}`,
-        totalPrice: parseFloat(charges?.MonetaryValue || '0'),
+        totalPrice: Number.isFinite(parsedTotal) ? parsedTotal : 0,
         currency: charges?.CurrencyCode || 'USD',
       };
     });
