@@ -7,6 +7,7 @@ const envSchema = z.object({
    UPS_CLIENT_ID : z.string().min(1, "UPS_CLIENT_ID is required"),
    UPS_CLIENT_SECRET : z.string().min(1, "UPS_CLIENT_SECRET is required"),
    UPS_BASE_URL : z.url().default('https://wwwcie.ups.com/api'),
+   UPS_AUTH_URL : z.url().default('https://wwwcie.ups.com/security/v1/oauth/token'),
     UPS_ACCOUNT_NUMBER: z.string().length(6).optional(),
    UPS_API_VERSION : z.coerce.string().default('v1'),
    HTTP_TIMEOUT : z.coerce.number().default(30000),
