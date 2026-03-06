@@ -14,7 +14,7 @@ export const mockRateSuccess = {
 
                 TotalCharges : {
                     CurrencyCode : 'USD',
-                    MonetaryValue : '10.50'
+                    MonetaryValue : '12.50'
                 },
             },
             {
