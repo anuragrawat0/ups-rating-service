@@ -36,6 +36,38 @@ describe('UPS Rating Service Integration Tests', ()=> {
     expect(quota[0]?.totalPrice).toBe(12.50);
   });
 
+  it('should build the correct request payload for UPS', async()=> {
+     mockedAxios.post
+        .mockResolvedValueOnce({ data: mockOAuthSuccess })
+        .mockResolvedValueOnce({ data: mockRateSuccess });
+
+    await service.getRates(validOrder);
+
+    const ratingCall = mockedAxios.post.mock.calls[1]!;
+    const headers = ratingCall[2]?.headers;
+    const body = ratingCall[1] as any;
+
+    expect(headers?.Authorization).toBe(`Bearer ${
+        mockOAuthSuccess.access_token}`);
+
+    expect(body.RateRequest.Shipment.ShipTo.PostalCode).toBe('90001');
+  });
+
+  it('should reuse the cached token for subsequent requests', async()=> {
+    mockedAxios.post
+        .mockResolvedValueOnce({ data: mockOAuthSuccess })
+        .mockResolvedValueOnce({ data: mockRateSuccess })
+        .mockResolvedValueOnce({ data: mockRateSuccess });
+
+    await service.getRates(validOrder);
+    await service.getRates(validOrder);
+
+    const tokenClls = mockedAxios.post.mock.calls.filter(call => call[0].includes('oauth'));
+
+    expect(tokenClls.length).toBe(1);
+
+  });
+
   it('should throw a clean error if the UPS password is wrong', async()=> {
     mockedAxios.post.mockRejectedValue({
         response : {
@@ -60,4 +92,28 @@ describe('UPS Rating Service Integration Tests', ()=> {
         statusCode: 400
     });
   })
+
+  it('should hanle UPS server errors succesfully', async()=>{
+    mockedAxios.post
+        .mockResolvedValueOnce({ data: mockOAuthSuccess })
+        .mockRejectedValueOnce({
+            response : {
+                status : 500,
+                data : 'Internal Server Error'
+            }
+        });
+    await expect(service.getRates(validOrder)).rejects.toMatchObject({
+        statusCode: 500
+    });
+});
+   
+  it('should safely abort if the network connection drops', async() => {
+    mockedAxios.post
+        .mockResolvedValueOnce({ data: mockOAuthSuccess })
+        .mockRejectedValueOnce({ code: 'ECONNABORTED' });
+
+    await expect(service.getRates(validOrder)).rejects.toMatchObject({
+        statusCode : 408
+        });
+    })
 })
