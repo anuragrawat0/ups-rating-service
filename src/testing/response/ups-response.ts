@@ -47,7 +47,7 @@ export const mockRateError401 = {
     response : {
         errors : [
             {
-                code : '250002',
+                code : '250004',
                 message : 'Invalid Authentication',
             },
         ],
