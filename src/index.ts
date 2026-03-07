@@ -19,7 +19,7 @@ async function gettingCredentials() {
             streetLines : ['nalapani delhi road'],
             city : 'New Delhi',
             state : 'DL',
-            postalCode : '110015',
+            postalCode : '248001',
             countryCode : 'IN'
         },
 
