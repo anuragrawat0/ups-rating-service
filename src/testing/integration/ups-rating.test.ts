@@ -62,9 +62,9 @@ describe('UPS Rating Service Integration Tests', ()=> {
     await service.getRates(validOrder);
     await service.getRates(validOrder);
 
-    const tokenClls = mockedAxios.post.mock.calls.filter(call => call[0].includes('oauth'));
+    const tokenCalls = mockedAxios.post.mock.calls.filter(call => call[0].includes('oauth'));
 
-    expect(tokenClls.length).toBe(1);
+    expect(tokenCalls.length).toBe(1);
 
   });
 
